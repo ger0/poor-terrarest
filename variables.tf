@@ -1,12 +1,12 @@
 variable "location" {
     description = "The Azure Region in which all resources will be created."
-    default     = "Sweden Central"
+    default     = "eastus"
 }
 
 variable "name" {
     type        = string
     description = "The name of the application."
-    default     = "resotowo"
+    default     = "restowo"
 }
 
 variable "sql_db_name" {
@@ -28,7 +28,7 @@ variable "python_version" {
 variable "admin_username" {
   type        = string
   description = "The administrator username of the SQL logical server."
-  default     = "admin"
+  default     = "gerou"
 }
 
 variable "admin_password" {

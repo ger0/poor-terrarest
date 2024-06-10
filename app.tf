@@ -6,6 +6,22 @@ resource "azurerm_service_plan" "asp" {
   sku_name            = "Y1"
 }
 
+resource "azurerm_log_analytics_workspace" "la" {
+  name                = "${var.name}${var.environment}workspace"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.name}${var.environment}appinsights"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  application_type    = "other"
+  workspace_id        = azurerm_log_analytics_workspace.la.id
+}
+
 resource "azurerm_storage_account" "appcode" {
   name                     = "${var.name}${var.environment}storage"
   resource_group_name      = azurerm_resource_group.rg.name
@@ -26,7 +42,9 @@ resource "azurerm_linux_function_app" "function_app" {
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE" = "",
+    "AzureWebJobsStorage"      = azurerm_storage_account.appcode.primary_connection_string
     "FUNCTIONS_WORKER_RUNTIME" = "python",
+    "SQL_CONNECTION_STRING"    = "Server=tcp:${azurerm_mssql_server.server.name}.database.windows.net,1433;Database=${azurerm_mssql_database.db.name};User ID=${var.admin_username};Password=${local.admin_password};Encrypt=true;Connection Timeout=30;"
   }
 
   site_config {
