@@ -6,13 +6,13 @@ variable "location" {
 variable "name" {
     type        = string
     description = "The name of the application."
-    default     = "rest-garbage"
+    default     = "resotowo"
 }
 
 variable "sql_db_name" {
     type        = string
     description = "The name of the SQL database."
-    default     = "restowo"
+    default     = "restowo-db"
 }
 
 variable "environment" {
