@@ -1,5 +1,9 @@
 CREATE TABLE users (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    username NVARCHAR(50) NOT NULL,
-    email NVARCHAR(50) NOT NULL
+    username VARCHAR(100) PRIMARY KEY,
+
+);
+
+CREATE TABLE journal (
+    title VARCHAR(100) PRIMARY KEY,
+    content VARCHAR(512)
 );

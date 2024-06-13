@@ -44,7 +44,7 @@ resource "azurerm_linux_function_app" "function_app" {
     "WEBSITE_RUN_FROM_PACKAGE" = "",
     "AzureWebJobsStorage"      = azurerm_storage_account.appcode.primary_connection_string
     "FUNCTIONS_WORKER_RUNTIME" = "python",
-    "SQL_CONNECTION_STRING"    = "DRIVER={ODBC Driver 17 for SQL Server};Server=tcp:${azurerm_mssql_server.server.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.db.name};User ID=${var.admin_username};Password=${local.admin_password};Encrypt=True"
+    "SQL_CONNECTION_STRING"    = "DRIVER={ODBC Driver 17 for SQL Server};Server=tcp:${azurerm_mssql_server.server.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.db.name};UID=${var.admin_username};PWD=${local.admin_password}"
   }
 
   site_config {

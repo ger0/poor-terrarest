@@ -42,3 +42,20 @@ resource "azurerm_mssql_firewall_rule" "allow_function_app" {
   end_ip_address      = each.value
 }
 
+resource "null_resource" "create_tables" {
+  depends_on = [azurerm_sql_database.example]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      sqlcmd -S ${azurerm_sql_server.server.fully_qualified_domain_name} \
+             -U ${var.admin_username} \
+             -P ${local.admin_password} \
+             -d ${azurerm_sql_database.db.name} \
+             -i create_table.sql
+    EOT
+
+    environment = {
+      PATH = "/opt/mssql-tools/bin:${PATH}"
+    }
+  }
+}
