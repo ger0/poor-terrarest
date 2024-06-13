@@ -1,17 +1,20 @@
 import logging
-
-import azure.functions as func
-
 import os
+import azure.functions as func
 import pyodbc
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+
+app = func.FunctionApp()
+
+@app.function_name(name="create")
+@app.route(route='create', auth_level=func.AuthLevel.ANONYMOUS, methods=["GET"])
+def create(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
     query="SELECT * FROM dbo.users"
     connection_string = os.getenv('SQL_CONNECTION_STRING')
 
     try:
-        with pyodbc.connect(conn_str) as conn:
+        with pyodbc.connect(connection_string) as conn:
             cursor = conn.cursor()
             # Create table if it doesn't exist
             cursor.execute("""

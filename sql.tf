@@ -24,4 +24,21 @@ resource "azurerm_mssql_server" "server" {
 resource "azurerm_mssql_database" "db" {
   name      = var.sql_db_name
   server_id = azurerm_mssql_server.server.id
+  sku_name            = "S1"
 }
+
+resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
+  name                = "AllowAzureServices"
+  server_id           = azurerm_mssql_server.server.id
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
+}
+
+resource "azurerm_mssql_firewall_rule" "allow_function_app" {
+  for_each            = toset(split(",", azurerm_linux_function_app.function_app.outbound_ip_addresses))
+  server_id           = azurerm_mssql_server.server.id
+  name                = "AllowFunctionApp${each.key}"
+  start_ip_address    = each.value
+  end_ip_address      = each.value
+}
+
