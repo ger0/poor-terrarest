@@ -21,3 +21,4 @@ func azure functionapp publish restingdev001app --python
 journal-add requires an input json with 'title' and 'content'
 journal-get requires a parameter 'title', displays content for the specified entry
 journal-list lists all journal entries
+journal-delete requires a parameter 'title', removes the specified entry

@@ -72,7 +72,7 @@ resource "null_resource" "create_tables" {
              -U ${var.admin_username} \
              -P ${local.admin_password} \
              -d ${azurerm_mssql_database.db.name} \
-             -Q "CREATE TABLE journal (\
+             -Q "CREATE TABLE IF NOT EXISTS journal (\
                     title VARCHAR(100) PRIMARY KEY,\
                     content VARCHAR(512));"
     EOT

@@ -295,6 +295,27 @@ def journal_get(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Error: {str(e)}", status_code=500)
 
 
+@app.function_name(name="journal-delete")
+@app.route(route='journal-delete', auth_level=func.AuthLevel.ANONYMOUS, methods=["GET"])
+def journal_delete(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a journal request.')
+    query = "DELETE FROM journal WHERE title = ?"
+
+    try:
+        title = req.params.get('title')
+        with pyodbc.connect(SQL_CONNECTION_STR) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, title)
+            return func.HttpResponse(
+                "Successfully deleted the entry...",
+                status_code=200,
+                headers={"Content-Type": "application/json"},
+            )
+    except Exception as e:
+        logging.error(f"Error: {str(e)}")
+        return func.HttpResponse(f"Error: {str(e)}", status_code=500)
+
+
 @app.function_name(name="journal-list")
 @app.route(route='journal-list', auth_level=func.AuthLevel.ANONYMOUS, methods=["GET"])
 def journal_list(req: func.HttpRequest) -> func.HttpResponse:
