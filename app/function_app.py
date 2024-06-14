@@ -32,8 +32,8 @@ def create(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(f"Error: {str(e)}", status_code=500)
 
 
-@app.function_name(name="journal/list")
-@app.route(route='journal/list', auth_level=func.AuthLevel.ANONYMOUS, methods=["GET"])
+@app.function_name(name="journal-list")
+@app.route(route='journal-list', auth_level=func.AuthLevel.ANONYMOUS, methods=["GET"])
 def journal_list(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a journal request.')
     query = "SELECT * FROM journal;"
@@ -77,8 +77,8 @@ def insert_data_to_sql(data):
         return False
 
 
-@app.function_name(name="journal/add")
-@app.route(route='journal/add', auth_level=func.AuthLevel.ANONYMOUS, methods=["POST"])
+@app.function_name(name="journal-add")
+@app.route(route='journal-add', auth_level=func.AuthLevel.ANONYMOUS, methods=["POST"])
 def journal_add(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a journal push request.')
     try:
