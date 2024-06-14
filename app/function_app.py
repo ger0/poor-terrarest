@@ -19,14 +19,42 @@ def create(req: func.HttpRequest) -> func.HttpResponse:
             cursor = conn.cursor()
             # Create table if it doesn't exist
             cursor.execute("""
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='users' and xtype='U')
-                CREATE TABLE users (
-                    id INT PRIMARY KEY IDENTITY(1,1),
-                    name NVARCHAR(50)
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='journal' and xtype='U')
+            CREATE TABLE journal (
+                    title VARCHAR(100) PRIMARY KEY,
+                    content VARCHAR(512)
                 )
             """)
             conn.commit()
-            return func.HttpResponse("Table 'users' created or already exists.", status_code=200)
+            return func.HttpResponse("Table 'journal' created or already exists.", status_code=200)
+    except Exception as e:
+        logging.error(f"Error: {str(e)}")
+        return func.HttpResponse(f"Error: {str(e)}", status_code=500)
+
+
+@app.function_name(name="journal-get")
+@app.route(route='journal-get', auth_level=func.AuthLevel.ANONYMOUS, methods=["GET"])
+def journal_get(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a journal request.')
+    query = "SELECT * FROM journal WHERE title = ?"
+    connection_string = os.getenv('SQL_CONNECTION_STRING')
+
+    try:
+        title = req.params.get('title')
+        with pyodbc.connect(connection_string) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, title)
+
+            result = {"content": "Journal Entry with the specified title doesn't exist!"}
+            for row in cursor.fetchall():
+                result = {"content": row.content}
+
+            json_data = json.dumps(result)
+            return func.HttpResponse(
+                json_data,
+                status_code=200,
+                headers={"Content-Type": "application/json"},
+            )
     except Exception as e:
         logging.error(f"Error: {str(e)}")
         return func.HttpResponse(f"Error: {str(e)}", status_code=500)
@@ -47,7 +75,6 @@ def journal_list(req: func.HttpRequest) -> func.HttpResponse:
             results = []
             for row in cursor.fetchall():
                 results.append({
-                    'id': row.id,
                     'title': row.title,
                     'content': row.content,
                     # Add more columns as needed
