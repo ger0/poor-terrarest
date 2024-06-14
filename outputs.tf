@@ -6,3 +6,6 @@ output "admin_password" {
   sensitive = true
   value     = local.admin_password
 }
+output "func_outbound_ips" {
+  value = split(",", azurerm_linux_function_app.function_app.outbound_ip_addresses)
+}

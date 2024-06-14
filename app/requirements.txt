@@ -1,2 +1,8 @@
+azure-storage-blob
+azure-identity
+azure-data-tables
 azure-functions
+azure-storage-queue
+azure-cognitiveservices-vision-computervision
 pyodbc
+

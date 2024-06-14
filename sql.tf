@@ -13,7 +13,7 @@ locals {
 }
 
 resource "azurerm_mssql_server" "server" {
-  name                         = "sqlserver-restny"
+  name                         = var.sql_sv_name
   resource_group_name          = azurerm_resource_group.rg.name
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
@@ -43,12 +43,31 @@ resource "azurerm_mssql_firewall_rule" "allow_function_app" {
   end_ip_address      = each.value
 }
 
-resource "null_resource" "create_tables" {
-  depends_on = [azurerm_mssql_firewall_rule.allow_function_app]
+data "http" "my_public_ip" {
+  url = "https://ifconfig.co/json"
+  request_headers = {
+    Accept = "application/json"
+  }
+}
 
+locals {
+  ifconfig_co_json = jsondecode(data.http.my_public_ip.body)
+  my_ip_addr = local.ifconfig_co_json.ip
+}
+
+resource "azurerm_mssql_firewall_rule" "allow_this_pc" {
+  depends_on          = [azurerm_linux_function_app.function_app]
+  server_id           = azurerm_mssql_server.server.id
+  name                = "AllowFunctionApp_PC"
+  start_ip_address    = local.my_ip_addr
+  end_ip_address      = local.my_ip_addr
+}
+
+resource "null_resource" "create_tables" {
+  depends_on = [azurerm_mssql_firewall_rule.allow_this_pc]
   provisioner "local-exec" {
     command = <<EOT
-      export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1;
+      export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1; \
       mssql-cli -S ${azurerm_mssql_server.server.fully_qualified_domain_name} \
              -U ${var.admin_username} \
              -P ${local.admin_password} \

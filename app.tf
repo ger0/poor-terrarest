@@ -1,3 +1,11 @@
+resource "azurerm_storage_account" "appcode" {
+  name                     = "${var.name}${var.environment}storage"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
 resource "azurerm_service_plan" "asp" {
   name                = "${var.name}${var.environment}serviceplan"
   resource_group_name = azurerm_resource_group.rg.name
@@ -22,14 +30,6 @@ resource "azurerm_application_insights" "insights" {
   workspace_id        = azurerm_log_analytics_workspace.la.id
 }
 
-resource "azurerm_storage_account" "appcode" {
-  name                     = "${var.name}${var.environment}storage"
-  resource_group_name      = azurerm_resource_group.rg.name
-  location                 = azurerm_resource_group.rg.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-}
-
 resource "azurerm_linux_function_app" "function_app" {
   name                       = "${var.name}${var.environment}app"
   resource_group_name        = azurerm_resource_group.rg.name
@@ -45,6 +45,21 @@ resource "azurerm_linux_function_app" "function_app" {
     "AzureWebJobsStorage"      = azurerm_storage_account.appcode.primary_connection_string
     "FUNCTIONS_WORKER_RUNTIME" = "python",
     "SQL_CONNECTION_STRING"    = "DRIVER={ODBC Driver 17 for SQL Server};Server=tcp:${azurerm_mssql_server.server.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.db.name};UID=${var.admin_username};PWD=${local.admin_password}"
+
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.insights.instrumentation_key,
+    "AzureWebJobsFeatureFlags" = "EnableWorkerIndexing"
+    "ENV_PHOTOS_CONTAINER_URL" = azurerm_storage_account.photos.primary_blob_endpoint
+    "ENV_PHOTOS_CONTAINER_NAME" = azurerm_storage_container.photos.name
+    "ENV_PHOTOS_TABLE_URL" = azurerm_storage_account.photos.primary_table_endpoint
+    "ENV_PHOTOS_TABLE_NAME" = azurerm_storage_table.photos.name
+    "ENV_PHOTOS_QUEUE_URL" = azurerm_storage_account.photos.primary_queue_endpoint
+    "ENV_PHOTOS_QUEUE_NAME" = azurerm_storage_queue.photoqueue.name
+    "ENV_PHOTOS_PRIMARY_KEY" = azurerm_storage_account.photos.primary_access_key
+    "ENV_PHOTOS_ACCOUNT_NAME" = azurerm_storage_account.photos.name
+    "ENV_PHOTOS_CONNSTR" = azurerm_storage_account.photos.primary_connection_string
+
+    "ENV_COGNITIVE_URL" = azurerm_cognitive_account.cognitive.endpoint
+    "ENV_COGNITIVE_KEY" = azurerm_cognitive_account.cognitive.primary_access_key
   }
 
   site_config {

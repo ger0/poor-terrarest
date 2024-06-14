@@ -6,18 +6,24 @@ variable "location" {
 variable "name" {
     type        = string
     description = "The name of the application."
-    default     = "restny"
+    default     = "resting"
+}
+
+variable "sql_sv_name" {
+    type        = string
+    description = "The name of the SQL server."
+    default     = "resting-serv"
 }
 
 variable "sql_db_name" {
     type        = string
     description = "The name of the SQL database."
-    default     = "restny-db"
+    default     = "resting-db"
 }
 
 variable "environment" {
     description = "The environment in which the application will be deployed."
-    default     = "dev005"
+    default     = "dev001"
 }
 
 variable "python_version" {
